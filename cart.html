@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - Loosely FITTED</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 20px;
+        }
+
+        .cart-items {
+            padding: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .cart-item button {
+            background-color: #f00;
+            color: #fff;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .cart-item button:hover {
+            background-color: #c00;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-controls button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .quantity-controls span {
+            font-size: 1rem;
+        }
+
+        .checkout-button {
+            background-color: #fff;
+            color: #000;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .checkout-button:hover {
+            background-color: #555;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .cart-items {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 style="color:black;">Your Things Are Here</h1>
+    </header>
+
+    <section class="cart-items" id="cart-items">
+        <!-- Cart items will be dynamically inserted here -->
+    </section>
+
+    <section class="cart-items">
+        <button class="checkout-button" onclick="sendOrder()">Checkout</button>
+    </section>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        function updateCartPage() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            cartItemsContainer.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p style="text-align: center">Your cart is empty.</p>';
+                return;
+            }
+
+            let totalPrice = 0;
+
+            cart.forEach((item, index) => {
+                totalPrice += item.price * item.quantity;
+                cartItemsContainer.innerHTML += `
+                    <div class="cart-item">
+                        <span>${item.name}</span>
+                        <div class="quantity-controls">
+                            <button onclick="changeQuantity(${index}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="changeQuantity(${index}, 1)">+</button>
+                        </div>
+                        <span>R${item.price} x ${item.quantity}</span>
+                        <span>Total: R${item.price * item.quantity}</span>
+                        <button onclick="removeFromCart(${index})">Remove</button>
+                    </div>
+                `;
+            });
+
+            cartItemsContainer.innerHTML += `<div class="cart-item"><strong>Grand Total: R${totalPrice.toFixed(2)}</strong></div>`;
+        }
+
+        function changeQuantity(index, delta) {
+            if (cart[index].quantity + delta <= 0) {
+                removeFromCart(index);
+            } else {
+                cart[index].quantity += delta;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartPage();
+            }
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartPage();
+        }
+
+        function sendOrder() {
+            let message = 'Order Details:\n\n';
+            let totalPrice = 0;
+
+            cart.forEach(item => {
+                totalPrice += item.price * item.quantity;
+                message += `${item.name}: R${item.price} x ${item.quantity}\n`;
+            });
+
+            message += `\nGrand Total: R${totalPrice.toFixed(2)}`;
+            const whatsappURL = `https://wa.me/27639336471?text=${encodeURIComponent(message)}`;
+            window.open(whatsappURL, '_blank');
+        }
+
+        updateCartPage();
+    </script>
+
+</body>
+</html>
